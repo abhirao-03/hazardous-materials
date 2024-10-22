@@ -44,7 +44,7 @@ Nx = 100                # Number of spatial points
 Nt = 10000                # Number of time steps
 dx = L / (Nx - 1)       # Spatial step size
 dt = T / Nt             # Time step size
-C = dt / dx**2 
+C = dt / dx**2
 
 x = np.linspace(0, L, Nx)
 
@@ -85,7 +85,7 @@ fig, ax = plt.subplots()
 # Create an initial heatmap
 x_curr = U_tracked_x[0,:, np.newaxis]
 y_curr = U_tracked_y[0,:, np.newaxis]
-A = x_curr + y_curr.T
+A = x_curr @ y_curr.T
 
 norm = Normalize(vmin=0, vmax=0.7)
 
@@ -107,7 +107,7 @@ def generate_data():
     for i in range(Nt-1):
         x_curr = U_tracked_x[i+1,:, np.newaxis]
         y_curr = U_tracked_y[i+1,:, np.newaxis]
-        new_A = x_curr + y_curr.T
+        new_A = x_curr @ y_curr.T
         yield new_A
 
 

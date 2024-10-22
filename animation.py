@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.colors import Normalize
 
 class gas_canistor:
     def __init__(self, loc = 0.5, radius = 0.05, concentration = 1.0):
@@ -40,11 +42,9 @@ L = 1.0                 # Length of interval
 T = 10.0                 # Total time
 Nx = 100                # Number of spatial points
 Nt = 10000                # Number of time steps
-
 dx = L / (Nx - 1)       # Spatial step size
 dt = T / Nt             # Time step size
 C = dt / dx**2 
-
 
 x = np.linspace(0, L, Nx)
 
@@ -78,11 +78,6 @@ for n in range(Nt - 1):
 U_tracked_x = np.copy(U_tracked)
 U_tracked_y = np.copy(U_tracked)
 
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib.colors import Normalize
-
 
 # Initialize the figure and axis
 fig, ax = plt.subplots()
@@ -114,7 +109,6 @@ def generate_data():
         y_curr = U_tracked_y[i+1,:, np.newaxis]
         new_A = x_curr + y_curr.T
         yield new_A
-
 
 
 # Create the animation

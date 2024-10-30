@@ -64,9 +64,12 @@ for i in range(1, Nx - 1):
     A[i, i + 1] = -C
 
 A[0, 0] = 1 + 2 * C
-A[0, 1] = -2 * C   
-A[Nx - 1, Nx - 2] = -2 * C 
+A[0, 1] = -2 * C
+A[Nx - 1, Nx - 2] = -2 * C
 A[Nx - 1, Nx - 1] = 1 + 2 * C
+
+np.block([[A, -np.eye(A.shape)],
+          [-np.eye(A.shape), A]])
 
 
 for n in range(Nt - 1):

@@ -1,4 +1,4 @@
-class model_parameters():
+class parameters():
     """
     Defines the parameters for our model
 
@@ -14,7 +14,7 @@ class model_parameters():
         model_parameters Object
             Containing all the defined parameters
     """
-    def __init__(self, len_x=1.0, len_y=1.0, Nx_points=100, Ny_points=100, t_end=10.0, t_num_steps=1000):
+    def __init__(self, len_x=1.0, len_y=1.0, Nx_points=100, Ny_points=100, t_end=10.0, Nt_points=1000):
         self.len_x = len_x
         self.len_y = len_y
         self.Nx_points = Nx_points
@@ -23,8 +23,8 @@ class model_parameters():
         self.dy = self.len_y / self.Ny_points
 
         self.t_end = t_end
-        self.num_steps = t_num_steps
-        self.dt = self.t_end / self.num_steps
+        self.Nt_points = Nt_points
+        self.dt = self.t_end / self.Nt_points
 
         self.Cx = self.dt / (self.dx ** 2)
         self.Cy = self.dt / (self.dt ** 2)

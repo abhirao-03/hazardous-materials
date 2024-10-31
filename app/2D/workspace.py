@@ -5,8 +5,8 @@ import model_params as model
 
 parameters   = model.parameters()
 gas_canistor = sg.GasCan2D(x_loc=0.5, y_loc=0.5, radius=0.2, concentration=1.0)
-scrubbers = [sg.Scrubber2D(x_loc=0.3, y_loc=0.3, radius=0.1, efficiency=100.0),
-             sg.Scrubber2D(x_loc=0.7, y_loc=0.7, radius=0.1, efficiency=100.0)]
+scrubbers = [sg.Scrubber2D(x_loc=0.3, y_loc=0.5, radius=0.1, efficiency=100.0),
+             sg.Scrubber2D(x_loc=0.7, y_loc=0.5, radius=0.1, efficiency=100.0)]
 
 def build_matrix(parameters: model.parameters, scrubbers: list, x, y):
     """
@@ -22,12 +22,12 @@ def build_matrix(parameters: model.parameters, scrubbers: list, x, y):
     Outputs:
         A           Large block matrix described on page __  
     """
-    a = 1 + 2*parameters.diffusion_coeff*parameters.dt*(1/parameters.dx**2 + 1/parameters.dy**2) + parameters.dt*(scrubbers[0].sink(x, y))
+    b = 1 + 2*parameters.diffusion_coeff*parameters.dt*(1/parameters.dx**2 + 1/parameters.dy**2) + parameters.dt*(scrubbers[0].sink(x, y))
 
     for i in range(1, len(scrubbers)):
-        a += parameters.dt*(scrubbers[i].sink(x, y))
+        b += parameters.dt*(scrubbers[i].sink(x, y))
 
-    B = np.diag(a)
+    B = np.diag(b)
 
     for i in range(parameters.Nx_points - 1):
         B[i+1, i] = -parameters.Cx

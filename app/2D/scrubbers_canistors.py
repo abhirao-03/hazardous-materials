@@ -27,15 +27,11 @@ class GasCan2D:
 
 
 class Scrubber2D():
-    def __init__(self, x_loc, y_loc, radius, efficiency, cap):
+    def __init__(self, x_loc, y_loc, radius, efficiency):
         self.x_loc = x_loc                          # Central x location of the scrubber
         self.y_loc = y_loc                          # Central y location of the scrubber
         self.radius = radius                        # Radius of the scrubber
         self.efficiency = efficiency                # Efficiency of the scrubber to absorb gas
-
-        # Possible implementation of scrubber capacity?
-        # self.cap = cap                              # Maximum concentration that can be absorbed
-        # self.current_load = 0                       # Current concentration absorbed so far
 
     def get_affected_indices(self, x, y):
         # Create a meshgrid of the x-y plane to apply masks over
@@ -45,3 +41,7 @@ class Scrubber2D():
         mask = (X - self.x_loc)**2 + (Y - self.y_loc)**2 <= self.radius**2
     
         return mask
+
+    def sink(self, x, y):
+        exp_term = np.exp(-((x - self.x_loc)**2 + (y - self.y_loc)**2)/(2*self.radius**2))
+        return self.efficiency * exp_term

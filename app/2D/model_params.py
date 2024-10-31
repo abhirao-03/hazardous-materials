@@ -14,7 +14,7 @@ class parameters():
         model_parameters Object
             Containing all the defined parameters
     """
-    def __init__(self, len_x=1.0, len_y=1.0, Nx_points=100, Ny_points=100, t_end=1.0, Nt_points=10000):
+    def __init__(self, len_x=1.0, len_y=1.0, Nx_points=100, Ny_points=100, t_end=10.0, Nt_points=10000):
         self.len_x = len_x
         self.len_y = len_y
         self.Nx_points = Nx_points
@@ -26,7 +26,7 @@ class parameters():
         self.Nt_points = Nt_points
         self.dt = self.t_end / self.Nt_points
 
-        self.Cx = self.dt / (self.dx ** 2)
-        self.Cy = self.dt / (self.dy ** 2)
+        self.diffusion_coeff = 10e-2
 
-        self.diffusion_coeff = 10e-5
+        self.Cx = self.diffusion_coeff * (self.dt / (self.dx ** 2))
+        self.Cy = self.diffusion_coeff * (self.dt / (self.dy ** 2))

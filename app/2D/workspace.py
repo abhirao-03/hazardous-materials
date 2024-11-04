@@ -1,4 +1,4 @@
-import scrubbers_canistors as sg
+import scrubbers_canisters as sg
 import numpy as np
 import scipy.sparse as sp
 import model_params as model

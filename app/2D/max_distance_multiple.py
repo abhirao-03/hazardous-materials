@@ -4,13 +4,16 @@
 
 import numpy as np
 import model_params as model
-import scrubbers_canistors as sg
+import scrubbers_canisters as sg
 import scipy.sparse as sp
-from workspace import build_matrix
 import matplotlib.pyplot as plt
+
+from workspace import run_simulation
 from matplotlib.animation import FuncAnimation
 from itertools import combinations
 
+# Modules for plotting gas hulls
+# Note - need to install alphashape
 from alphashape import alphashape
 from shapely.geometry import Point  
 
@@ -20,7 +23,7 @@ parameters = model.parameters()
 # Function
 # =============================================================================   
  
-def max_distance(parameters: model.parameters, gas_canisters: list, build_matrix):
+def max_distance(parameters: model.parameters, gas_canisters: list, scrubbers: list, run_simulation):
     """
     Since each gas canister in the room is assumed to be identical, 
     (i.e idential initial concentration, gas, dimensions)
@@ -48,66 +51,55 @@ def max_distance(parameters: model.parameters, gas_canisters: list, build_matrix
     """
 
     # =========================================================================  
-    # Finding convex/concave hull for each canister
+    # Finding points locations in grid that satisfy 1% of initial conc.
     # =========================================================================  
-    
+
     # Initialise storage lists for plotting
+    satisfied_points = []
     gas_hulls = []
     canister_hulls = []
-    satisfied_points = []
     canister_centres = []
-    
-    for canister in gas_canisters:
-        
-    # ------------------------------------------------------------------------- 
+     
     # Running the model for each canister
-    # -------------------------------------------------------------------------  
-    # Perhaps turn model in to a function so we can just call the function here?      
-    
-        x = np.linspace(0, parameters.len_x, parameters.Nx_points)
-        y = np.linspace(0, parameters.len_y, parameters.Ny_points)
-        X, Y = np.meshgrid(x, y)
-
-        A = build_matrix(parameters=parameters, scrubbers=scrubbers, x=x, y=y)
-        U = np.zeros((parameters.Nt_points, parameters.Nx_points * parameters.Ny_points))
-
-        u_init = canister.get_initial_concentration(x, y).reshape((parameters.Nx_points * parameters.Ny_points),)
-        u = u_init.copy()
-        U[0, :] = u_init
-
-        for n in range(1, parameters.Nt_points):
-            u = sp.linalg.minres(A, u)[0]
-            U[n, :] = u
+    for canister in gas_canisters:
+  
+        U = run_simulation(gas_canister = canister, scrubbers = scrubbers)     
         
         # Unpack the flattened U matrix into a 3D matrix
         # ( with dimensions Nx_points, Ny_points, Nt_points )
-        U_3D = np.zeros((parameters.Nx_points, parameters.Ny_points, parameters.Nt_points))
-        for i in range(parameters.Nx_points):
-            U_3D[i] = U[:, i::parameters.Nx_points].T
+        U_3D = np.zeros((parameters.Nt_points, parameters.Nx_points, parameters.Ny_points))
+
+        for i in range(parameters.Nt_points):
+            U_3D[i] = np.flipud(U[i].reshape((parameters.Nx_points, parameters.Ny_points)))
         
-        # ---------------------------------------------------------------------
-        # Finding points which satisfy 1% of initial conc. 
-        # ---------------------------------------------------------------------       
-        
-        # Get threshold value for detector 
-        threshold = 0.01 * canister.concentration  # 1% threshold
+        # Define gridspace (discretized spatial points on x and y grid)
+        x = np.linspace(0, parameters.len_x, parameters.Nx_points)
+        y = np.linspace(0, parameters.len_y, parameters.Ny_points)        
         
         # Get canister location
         x_loc = canister.x_loc
         y_loc = canister.y_loc
          
         # Find indices of canister location in the spatial grid
-        # (closest value in the x and y arrays to x_loc and y_loc)
+        # (closest values in gridspace to x_loc and y_loc)
         x_idx = (np.abs(x - x_loc)).argmin()  
         y_idx = (np.abs(y - y_loc)).argmin()  
         
-        # Store this location
+        # Store the center of container in grid format
         canister_centres.append(np.array([x_idx, y_idx]))
-
+        
+        # Get threshold value for detector 
+        threshold = 0.01 * canister.concentration  # 1% threshold
+        
         # Find points where concentration is at least as much as the threshold
-        # this is across all timesteps to return a 2d array
-        threshold_mask = np.any(U_3D >= threshold, axis=2) # Boolean
-        points = np.argwhere(threshold_mask)  # Extract the "True" grid points
+        # on the spatial grid, across all timesteps
+        threshold_mask = np.any(U_3D >= threshold, axis=0) 
+        
+        # Extract the grid points for these grid points that satisfy condition
+        points = np.argwhere(np.flipud(threshold_mask))  
+        
+        # Reverse the coordinates to keep in grid format rather than row x column
+        points = points[:, ::-1]
         
         # Store Boolean of points which satisfy this condition for the canister
         satisfied_points.append(threshold_mask)
@@ -117,17 +109,22 @@ def max_distance(parameters: model.parameters, gas_canisters: list, build_matrix
         # ---------------------------------------------------------------------  
         
         # Plot to check if the grid points are correct
-        # fig, ax = plt.subplots()
-        # for point in points:
-        #     x, y = point  # Unpack the tuple into x and y
-        #     ax.plot(x, y, 'o', color='cyan', markersize=1)
+        
+        # fig, ax = plt.subplots(figsize=(6, 6))
+        # ax.set_xlabel('X')
+        # ax.set_ylabel('Y')
+        # ax.set_xlim(0, parameters.Nx_points)
+        # ax.set_ylim(0, parameters.Ny_points)
+        # ax.plot(points[:, 0], points[:, 1], 'o', color='cyan', markersize=5)
+        # plt.show()
+        
         # Commented out by default as only used for checking
             
-        # ---------------------------------------------------------------------
-        # Compute concave/convex hulls for gas and cannister 
-        # ---------------------------------------------------------------------  
+        # =========================================================================  
+        # Finding convex/concave hull for gas/canister/scrubber for plotting
+        # =========================================================================    
             
-        # Compute a hull for gas using alpha shapes
+        # Compute a hull for gas using alpha shapes to visualise in plot
         alpha = 0.1  # Lower alpha = tighter hull
         if len(points) >= 4:  # Alpha shapes require at least 4 points
             gas_hull = alphashape(points, alpha)
@@ -136,14 +133,34 @@ def max_distance(parameters: model.parameters, gas_canisters: list, build_matrix
             else:
                 # Store the computed hull in storage list
                 gas_hulls.append(gas_hull)
-
+             
         # Compute a hull for canister using alpha shapes
-        caniser_mask = canister.get_initial_concentration(x, y)
-        caniser_points = np.argwhere(caniser_mask)  
-        caniser_shape = alphashape(caniser_points, alpha)
-        canister_hulls.append(caniser_shape)    
-                
+        canister_mask = canister.get_initial_concentration(x, y)
+        canister_points = np.argwhere(np.flipud(canister_mask))  
+        canister_points = canister_points[:, ::-1]
+        canister_shape = alphashape(canister_points, alpha)
+        canister_hulls.append(canister_shape)    
     
+    # Exit canister loop and compute hulls for scrubbers
+    scrubber_hulls = []
+    scrubber_centres = []
+    
+    for scrubber in scrubbers:
+                 
+        # Find and store centre of scrubbers, similar to before
+        x_loc_scrub = scrubber.x_loc
+        y_loc_scrub = scrubber.y_loc
+        x_idx_scrub = (np.abs(x - x_loc_scrub)).argmin()  
+        y_idx_scrub = (np.abs(y - y_loc_scrub)).argmin()  
+        scrubber_centres.append(np.array([x_idx_scrub, y_idx_scrub]))
+        
+        # Find and store hull of scrubbers, similar to that of canister
+        scrubber_mask = scrubber.get_affected_indices(x,y)
+        scrubber_points = np.argwhere(np.flipud(scrubber_mask))  
+        scrubber_points = scrubber_points[:, ::-1]
+        scrubber_shape = alphashape(scrubber_points, alpha)
+        scrubber_hulls.append(scrubber_shape)    
+                     
     # =========================================================================  
     # Finding optimal location for detector(s)
     # =========================================================================  
@@ -151,38 +168,36 @@ def max_distance(parameters: model.parameters, gas_canisters: list, build_matrix
     # Generate the index combinations of all our canisters in descending order
     num_canisters = len(gas_canisters)
     total_combs = []
+    
     for r in range(num_canisters, 0, -1):
         total_combs.extend(combinations(range(num_canisters), r))
+      
+    # Iterate over each combination layer and add successful combinations to storage list
+    satisfied_combs = []  # Storage for index combinations that have overlap
     
-    # Now we figure out how many detectors we need
-    # We start with needing 1 detector
-    detectors_needed = 1
-    
-   # Generate the range from num_canisters to 1 (inclusive)
-   # Iterate over each combination layer
-   # Top layer = 1 detector needed
-   # Second layer = 2 needed etc...
-    for i in range(num_canisters, 0, -1):
-        
-        current_combs = [comb for comb in total_combs if len(comb) == i]
-        satisfied_combs = [] # Storage for index combinations that have overlap
+    # Don't iterate over last layer yet
+    for i in range(num_canisters, 1, -1):
         
         # Check if any of the combinations at this level can be satisfied
+        current_combs = [comb for comb in total_combs if len(comb) == i]
+        
+        # First check if any indices have already been covered:
+        # Flatten the tuples to find all unique indices that are already in satisfied_combs
+        flattened_satisfied_combs = set(index for comb in satisfied_combs for index in comb)
+        
         for comb in current_combs:
+    
+            if all(idx in flattened_satisfied_combs for idx in comb):
+                # Skip combinations that only include already covered canisters
+                continue
+            
             combined_mask = np.logical_and.reduce([satisfied_points[idx] for idx in comb])
+            
             if np.any(combined_mask):
                 # If combination is satisfied, add to list
                 satisfied_combs.append(comb)
-            
-        if satisfied_combs:
-            break # We found the minimum number of detectors needed at this level
-            
-        # Otherwise no combination at this level is satisfied, go to next level
-        else:
-            detectors_needed += 1
-            
-    # We now need to find what canisters are not included in the overlapping indices
 
+        
     # Flatten the tuples to find all unique indices that are included in satisfied_combs
     flattened_satisfied_combs = set(index for comb in satisfied_combs for index in comb)
     
@@ -192,16 +207,20 @@ def max_distance(parameters: model.parameters, gas_canisters: list, build_matrix
     # Add each missing element as a single-element tuple to satisfied_combs
     satisfied_combs.extend((elem,) for elem in missing_cans)
 
-    # Now that we have found a layer aka number of detectors we need, then:     
+    # Now that we have found number of detectors we need and for what gas containers, then:     
     detector_locs = []
     
+    # For each of our satisfied combinations
     for comb in satisfied_combs:
         
         # Create boolean mask for this index combination
         combined_mask = np.logical_and.reduce([satisfied_points[idx] for idx in comb])
-        
+
         # Extract the "True" grid points
-        candidate_points = np.argwhere(combined_mask)
+        candidate_points = np.argwhere(np.flipud(combined_mask))
+                
+        # Reverse the coordinates to keep in grid format rather than row x column
+        candidate_points = candidate_points[:, ::-1]
     
         # Function to calculate distance between two points
         def distance(point1, point2):
@@ -213,6 +232,7 @@ def max_distance(parameters: model.parameters, gas_canisters: list, build_matrix
 
         for candidate in candidate_points:
             total_distance = sum(distance(candidate, canister_centres[idx]) for idx in comb)
+            
             if total_distance > max_total_distance:
                 max_total_distance = total_distance
                 best_points = [candidate]  # Start a new list
@@ -260,27 +280,15 @@ def max_distance(parameters: model.parameters, gas_canisters: list, build_matrix
     # Choose a random canister to leak
     canister = np.random.choice(gas_canisters)
     
-    # Running the model for random canister
-    x = np.linspace(0, parameters.len_x, parameters.Nx_points)
-    y = np.linspace(0, parameters.len_y, parameters.Ny_points)
-    X, Y = np.meshgrid(x, y)
-
-    A = build_matrix(parameters=parameters, scrubbers=scrubbers, x=x, y=y)
-    U = np.zeros((parameters.Nt_points, parameters.Nx_points * parameters.Ny_points))
-
-    u_init = canister.get_initial_concentration(x, y).reshape((parameters.Nx_points * parameters.Ny_points),)
-    u = u_init.copy()
-    U[0, :] = u_init
-
-    for n in range(1, parameters.Nt_points):
-        u = sp.linalg.minres(A, u)[0]
-        U[n, :] = u
+    U = run_simulation(gas_canister = canister, scrubbers = scrubbers)     
     
     # Unpack the flattened U matrix into a 3D matrix
     # ( with dimensions Nx_points, Ny_points, Nt_points )
-    U_3D = np.zeros((parameters.Nx_points, parameters.Ny_points, parameters.Nt_points))
-    for i in range(parameters.Nx_points):
-        U_3D[i] = U[:, i::parameters.Nx_points].T
+    U_3D = np.zeros((parameters.Nt_points, parameters.Nx_points, parameters.Ny_points))
+
+    # Don't flip as just using for plotting
+    for k in range(parameters.Nt_points):
+        U_3D[k] = U[k].reshape((parameters.Nx_points, parameters.Ny_points))
         
     # -------------------------------------------------------------------------
     
@@ -291,19 +299,19 @@ def max_distance(parameters: model.parameters, gas_canisters: list, build_matrix
     ax.set_ylim(0, parameters.Ny_points)
     ax.set_xlabel("X Grid Index")
     ax.set_ylabel("Y Grid Index")
-    ax.set_title("Concave Hulls and Canister Locations")
+    ax.set_title("1% Gas Spread Radius with Container and Optimal Detector Locations")
 
     # -------------------------------------------------------------------------
         
     # Plot the heatmap
     min_concentration = 0
-    max_concentration = 0.2
+    max_concentration = 0.1
     
-    heatmap = ax.imshow(U_3D[:, :, 0], cmap='magma', vmin=min_concentration, vmax=max_concentration, interpolation='nearest')
+    heatmap = ax.imshow(U_3D[0], cmap='magma', vmin=min_concentration, vmax=max_concentration, interpolation='nearest', origin='lower')
 
     # Animation function
     def update(frame):
-        heatmap.set_array(U_3D[:, :, frame])
+        heatmap.set_array(U_3D[frame])
         ax.set_title(f"Time Step: {frame}")
         return heatmap,
     
@@ -317,7 +325,7 @@ def max_distance(parameters: model.parameters, gas_canisters: list, build_matrix
     for gas_hull in gas_hulls:
         if not gas_hull.is_empty:
             hull_x, hull_y = gas_hull.exterior.xy  
-            ax.plot(hull_y, hull_x, color='red', linestyle='-', linewidth=2, label="Max Distance to detect 1%")
+            ax.plot(hull_x, hull_y, color='lime', linestyle='-', linewidth=2, label="Max Distance to detect 1%")
             
     # -------------------------------------------------------------------------
             
@@ -325,25 +333,31 @@ def max_distance(parameters: model.parameters, gas_canisters: list, build_matrix
     for canister_shape in canister_hulls:
         if not canister_shape.is_empty:
             can_x, can_y = canister_shape.exterior.xy  
-            ax.plot(can_x, can_y, color='blue', linestyle='-', linewidth=2, label="Gas Canister Circumference")
+            ax.plot(can_x, can_y, color='white', linestyle='-', linewidth=2, label="Gas Canister Circumference")
             
     # -------------------------------------------------------------------------
     
     # Plot the locations of the gas canisters on the grid
-    for canister in gas_canisters:
-        # Convert canister's physical coordinates to grid indices
-        x_idx = (np.abs(x - canister.x_loc)).argmin()  # Find the closest grid point in x
-        y_idx = (np.abs(y - canister.y_loc)).argmin()  # Find the closest grid point in y
-        
-        # Plot the canister's grid position on the heatmap
-        ax.plot(x_idx, y_idx, 'o', color='green', markersize=8, label="Gas Canister Center")
-    
+    for centre in canister_centres:
+        ax.plot(centre[0], centre[1], 'o', color='white', markersize=8, label="Gas Canister Center")
+
     # -------------------------------------------------------------------------
     
     # Plot optimal point if it exists
     for point in detector_locs:
-        ax.plot(point[1], point[0], '*', color='yellow', markersize=15, label="Optimal Location")
+        ax.plot(point[0], point[1], '*', color='yellow', markersize=15, label="Optimal Location")
 
+    # -------------------------------------------------------------------------
+    
+    # Plot scrubbers
+    for scrubber_centre in scrubber_centres:
+        ax.plot(scrubber_centre[0], scrubber_centre[1], 'o', color='cyan', markersize=8, label="Scrubber Center")
+        
+    for scrubber_shape in scrubber_hulls:
+        if not scrubber_shape.is_empty:
+            scrub_x, scrub_y = scrubber_shape.exterior.xy  
+            ax.plot(scrub_x, scrub_y, color='cyan', linestyle='-', linewidth=2, label="Scrubber Circumference")
+            
     # -------------------------------------------------------------------------
     
     # After plotting everything, remove duplicate legend entries
@@ -361,35 +375,33 @@ def max_distance(parameters: model.parameters, gas_canisters: list, build_matrix
     print(f"{no_detectors} are needed to cover all the canisters.")
     
     for point in detector_locs:
-        
-        # Reverse the point's coordinates for grid intuition
-        point = point[::-1]
-    
+            
         # Calculate the physical coordinates for the given indices
         length_det = point[0] * parameters.dx
         width_det = point[1] * parameters.dy
             
         print(f"Optimal detector placement is at grid point of {point}",
-              f"This is at a length of {length_det:.4g} and width of {width_det:.4g}",
+              f"This is at a length of {length_det:.4g} and width of {width_det:.4g} frmo the origin",
               sep="\n")
+        
+    return U_3D
 
 # -------------------------------------------------------------------------
 
 gas_canisters = [ 
-    sg.GasCan2D(x_loc=0.5, y_loc=0.5,radius=0.05, concentration=1.0),
-    sg.GasCan2D(x_loc=0.1, y_loc=0.2,radius=0.05, concentration=1.0),
-    sg.GasCan2D(x_loc=0.9, y_loc=0.4,radius=0.05, concentration=1.0),
-    sg.GasCan2D(x_loc=0.1, y_loc=0.9,radius=0.05, concentration=1.0)
+    sg.GasCan2D(x_loc=0.9, y_loc=0.9,radius=0.05, concentration=1.0),
+    sg.GasCan2D(x_loc=0.1, y_loc=0.9,radius=0.05, concentration=1.0),
+    sg.GasCan2D(x_loc=0.4, y_loc=0.6,radius=0.05, concentration=1.0),
+    sg.GasCan2D(x_loc=0.7, y_loc=0.2,radius=0.05, concentration=1.0),
+    sg.GasCan2D(x_loc=0.9, y_loc=0.3,radius=0.05, concentration=1.0)
 ]
 
-scrubbers = [sg.Scrubber2D(x_loc=0.3, y_loc=0.5, radius=0.1, efficiency=0),
-             sg.Scrubber2D(x_loc=0.7, y_loc=0.5, radius=0.1, efficiency=0)]   
+scrubbers = [sg.Scrubber2D(x_loc=0.9, y_loc=0.5, radius=0.1, efficiency=0.95),
+             sg.Scrubber2D(x_loc=0.8, y_loc=0.3, radius=0.1, efficiency=0.80)]   
 
-max_distance(parameters=parameters, gas_canisters=gas_canisters, build_matrix=build_matrix)
+U_3D = max_distance(parameters=parameters, 
+                    gas_canisters=gas_canisters, 
+                    scrubbers=scrubbers, 
+                    run_simulation=run_simulation)
 
-# For the meshgrid, since using (indexing='ij'), the rows correspond to Y and
-# columns correspond to X.
-
-
-
-       
+      

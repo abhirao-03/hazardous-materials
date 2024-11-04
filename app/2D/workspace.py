@@ -3,12 +3,13 @@ import numpy as np
 import scipy.sparse as sp
 import model_params as model
 
-
-def run_simulation():
-    parameters   = model.parameters()
-    gas_canistor = sg.GasCan2D(x_loc=0.5, y_loc=0.5, radius=0.1, concentration=1.0)
-    scrubbers = [sg.Scrubber2D(x_loc=0.3, y_loc=0.5, radius=0.1, efficiency=100.0),
+gas_canistor = sg.GasCan2D(x_loc=0.5, y_loc=0.5, radius=0.1, concentration=1.0)
+scrubbers = [sg.Scrubber2D(x_loc=0.3, y_loc=0.5, radius=0.1, efficiency=100.0),
                 sg.Scrubber2D(x_loc=0.7, y_loc=0.5, radius=0.1, efficiency=100.0)]
+
+
+def run_simulation(gas_canistor = gas_canistor, scrubbers = scrubbers):
+    parameters   = model.parameters()
 
     def build_matrix(parameters: model.parameters, scrubbers: list, x, y):
         """

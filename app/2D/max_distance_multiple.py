@@ -17,7 +17,21 @@ from alphashape import alphashape
 from shapely.geometry import Point  
 
 parameters = model.parameters()
-  
+
+# =============================================================================   
+# Notes
+# =============================================================================   
+
+# - Throughout this code matrices have been made to resemble the gridspace
+#   as much as possible, mainly for better intuition of what's going on. However
+#   the "y-direction" is sometimes flipped using np.flipud() to perform indexing
+#   operations in order to conform with Python's default indexing system.
+
+# - It is assumed that the origin for our gridspace is a particular corner of
+#   the room, and this corner remains the origin throughout. Thus when we refer
+#   to "X" length, where X is a number, we are meaning the length from this 
+#   origin point, and likewise for the width. 
+
 # =============================================================================   
 # Function
 # =============================================================================   
@@ -99,7 +113,7 @@ def max_distance(parameters: model.parameters, gas_canisters: list, scrubbers: l
         
         # Reverse the coordinates to keep in grid format rather than row x column
         points = points[:, ::-1]
-        
+            
         # Store Boolean of points which satisfy this condition for the canister
         satisfied_points.append(threshold_mask)
         
@@ -127,9 +141,7 @@ def max_distance(parameters: model.parameters, gas_canisters: list, scrubbers: l
         alpha = 0.1  # Lower alpha = tighter hull
         if len(points) >= 4:  # Alpha shapes require at least 4 points
             gas_hull = alphashape(points, alpha)
-            if gas_hull.is_empty:
-                print(f"Hull could not be formed for canister at ({canister.x_loc}, {canister.y_loc})")
-            else:
+            if not gas_hull.is_empty:
                 # Store the computed hull in storage list
                 gas_hulls.append(gas_hull)
              
@@ -162,8 +174,8 @@ def max_distance(parameters: model.parameters, gas_canisters: list, scrubbers: l
                      
     # =========================================================================  
     # Finding optimal location for detector(s)
-    # =========================================================================  
-              
+    # ========================================================================= 
+     
     # Generate the index combinations of all our canisters in descending order
     num_canisters = len(gas_canisters)
     total_combs = []
@@ -324,7 +336,7 @@ def max_distance(parameters: model.parameters, gas_canisters: list, scrubbers: l
     for gas_hull in gas_hulls:
         if not gas_hull.is_empty:
             hull_x, hull_y = gas_hull.exterior.xy  
-            ax.plot(hull_x, hull_y, color='lime', linestyle='-', linewidth=2, label="Max Distance to detect 1%")
+            ax.plot(hull_x, hull_y, color='red', linestyle='-', linewidth=2, label="Max Distance to detect 1%")
             
     # -------------------------------------------------------------------------
             
@@ -332,13 +344,13 @@ def max_distance(parameters: model.parameters, gas_canisters: list, scrubbers: l
     for canister_shape in canister_hulls:
         if not canister_shape.is_empty:
             can_x, can_y = canister_shape.exterior.xy  
-            ax.plot(can_x, can_y, color='white', linestyle='-', linewidth=2, label="Gas Canister Circumference")
+            ax.plot(can_x, can_y, color='blue', linestyle='-', linewidth=2, label="Gas Canister Circumference")
             
     # -------------------------------------------------------------------------
     
     # Plot the locations of the gas canisters on the grid
     for centre in canister_centres:
-        ax.plot(centre[0], centre[1], 'o', color='white', markersize=8, label="Gas Canister Center")
+        ax.plot(centre[0], centre[1], 'o', color='green', markersize=8, label="Gas Canister Center")
 
     # -------------------------------------------------------------------------
     
@@ -369,20 +381,26 @@ def max_distance(parameters: model.parameters, gas_canisters: list, scrubbers: l
     plt.show()
     
     # -------------------------------------------------------------------------
-        
-    no_detectors = len(detector_locs)
-    print(f"{no_detectors} are needed to cover all the canisters.")
     
-    for point in detector_locs:
-            
+    # Print statements
+    
+    # Number of detectors needed
+    no_detectors = len(detector_locs)
+    print(f"\n{no_detectors} detectors are needed to cover all of the gas canisters.\n")
+    
+    # Print header of the table
+    print(f"{'Detector':<10} {'Grid Point (x, y)':<20} {'Length (m)':<15} {'Width (m)':<15}")
+    print("=" * 60)
+    
+    # Iterate through detector locations and print their placement details
+    for idx, point in enumerate(detector_locs, start=1):
         # Calculate the physical coordinates for the given indices
         length_det = point[0] * parameters.dx
         width_det = point[1] * parameters.dy
-            
-        print(f"Optimal detector placement is at grid point of {point}",
-              f"This is at a length of {length_det:.4g} and width of {width_det:.4g} frmo the origin",
-              sep="\n")
         
+        # Print row in tabular format
+        print(f"{idx:<10} {str(tuple(point)):<20} {length_det:<15.4g} {width_det:<15.4g}")
+                
     return U_3D
 
 # -------------------------------------------------------------------------
@@ -395,8 +413,8 @@ gas_canisters = [
     sg.GasCan2D(x_loc=0.9, y_loc=0.3,radius=0.05, concentration=1.0)
 ]
 
-scrubbers = [sg.Scrubber2D(x_loc=0.9, y_loc=0.5, radius=0.1, efficiency=0.95),
-             sg.Scrubber2D(x_loc=0.8, y_loc=0.3, radius=0.1, efficiency=0.80)]   
+scrubbers = [sg.Scrubber2D(x_loc=0.5, y_loc=0.7, radius=0.08, efficiency=500.0),
+                sg.Scrubber2D(x_loc=0.5, y_loc=0.3, radius=0.08, efficiency=500.0)]
 
 U_3D = max_distance(parameters=parameters, 
                     gas_canisters=gas_canisters, 

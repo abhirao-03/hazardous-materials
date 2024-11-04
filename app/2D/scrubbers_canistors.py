@@ -13,6 +13,8 @@ class GasCan2D:
         # Create a meshgrid of the x-y plane to apply masks over
         X, Y = np.meshgrid(x, y, indexing='ij')
 
+        Y = np.flipud(Y)
+
         # Create a boolean mask for equation of a circle, i.e the equation of the points where canister sits on the xy-plane
         mask = (X - self.x_loc)**2 + (Y - self.y_loc)**2 <= self.radius**2
 
@@ -37,6 +39,8 @@ class Scrubber2D():
         # Create a meshgrid of the x-y plane to apply masks over
         X, Y = np.meshgrid(x, y, indexing='ij')
 
+        Y = np.flipud(Y)
+        
         # Create a boolean mask for equation of a circle, i.e the equation of the points where canister sits on the xy-plane
         mask = (X - self.x_loc)**2 + (Y - self.y_loc)**2 <= self.radius**2
     

@@ -3,9 +3,11 @@ import model_params as model
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-from workspace import *
+from workspace import run_simulation
 
-U_tracked = U
+parameters = model.parameters()
+
+U_tracked = run_simulation()
 
 min_concentration = 0
 max_concentration = 0.2

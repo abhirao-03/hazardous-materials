@@ -4,8 +4,8 @@ import scipy.sparse as sp
 import model_params as model
 
 gas_canistor = sg.GasCan2D(x_loc=0.5, y_loc=0.5, radius=0.1, concentration=1.0)
-scrubbers = [sg.Scrubber2D(x_loc=0.3, y_loc=0.5, radius=0.1, efficiency=100.0),
-                sg.Scrubber2D(x_loc=0.7, y_loc=0.5, radius=0.1, efficiency=100.0)]
+scrubbers = [sg.Scrubber2D(x_loc=0.5, y_loc=0.7, radius=0.08, efficiency=300.0),
+                sg.Scrubber2D(x_loc=0.5, y_loc=0.3, radius=0.08, efficiency=300.0)]
 
 
 def run_simulation(gas_canistor = gas_canistor, scrubbers = scrubbers):

@@ -3,7 +3,7 @@ import model_params as model
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-from workspace import run_simulation
+from workspace import *
 
 parameters = model.parameters()
 
@@ -17,8 +17,8 @@ heatmap = ax.imshow(U_tracked[0].reshape(parameters.Nx_points, parameters.Ny_poi
 heatmap = ax.imshow(U_tracked[0].reshape(parameters.Nx_points, parameters.Ny_points), cmap='magma', vmin=min_concentration, vmax=max_concentration, interpolation='nearest')
 ax.set_title("Heatmap over Time")
 
-fixed_point, = ax.plot(30, 50, 'o', color='cyan', markersize=8)
-fixed_point, = ax.plot(70, 50, 'o', color='cyan', markersize=8)
+for scrubber in scrubbers:
+    fixed_point, = ax.plot(scrubber.x_loc*100, scrubber.y_loc*100, 'o', color='cyan', markersize=8, alpha=0.2)
 
 def update(frame):
     heatmap.set_array(U_tracked[frame].reshape(parameters.Nx_points, parameters.Ny_points))

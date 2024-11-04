@@ -11,7 +11,7 @@ class GasCan2D:
 
     def get_initial_concentration(self, x, y):
         # Create a meshgrid of the x-y plane to apply masks over
-        X, Y = np.meshgrid(x, y, indexing='ij')
+        X, Y = np.meshgrid(x, y)
 
         Y = np.flipud(Y)
 
@@ -37,10 +37,10 @@ class Scrubber2D():
 
     def get_affected_indices(self, x, y):
         # Create a meshgrid of the x-y plane to apply masks over
-        X, Y = np.meshgrid(x, y, indexing='ij')
+        X, Y = np.meshgrid(x, y)
 
         Y = np.flipud(Y)
-        
+
         # Create a boolean mask for equation of a circle, i.e the equation of the points where canister sits on the xy-plane
         mask = (X - self.x_loc)**2 + (Y - self.y_loc)**2 <= self.radius**2
     

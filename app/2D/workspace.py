@@ -3,12 +3,11 @@ import numpy as np
 import scipy.sparse as sp
 import model_params as model
 
-gas_canistor = sg.GasCan2D(x_loc=0.5, y_loc=0.5, radius=0.1, concentration=1.0)
+gas_canister = sg.GasCan2D(x_loc=0.5, y_loc=0.5, radius=0.1, concentration=1.0)
 scrubbers = [sg.Scrubber2D(x_loc=0.5, y_loc=0.7, radius=0.08, efficiency=300.0),
                 sg.Scrubber2D(x_loc=0.5, y_loc=0.3, radius=0.08, efficiency=300.0)]
 
-
-def run_simulation(gas_canistor = gas_canistor, scrubbers = scrubbers):
+def run_simulation(gas_canister = gas_canister, scrubbers = scrubbers):
     parameters   = model.parameters()
 
     def build_matrix(parameters: model.parameters, scrubbers: list, x, y):
@@ -48,7 +47,9 @@ def run_simulation(gas_canistor = gas_canistor, scrubbers = scrubbers):
     A = build_matrix(parameters=parameters, scrubbers=scrubbers, x=x, y=y)
     U = np.zeros((parameters.Nt_points, parameters.Nx_points * parameters.Ny_points))
 
-    u_init = gas_canistor.get_initial_concentration(x, y).reshape((parameters.Nx_points * parameters.Ny_points),)
+    u_init = np.flipud(gas_canister.get_initial_concentration(x, y))
+    u_init = u_init.reshape((parameters.Nx_points * parameters.Ny_points),)
+  
     u = u_init.copy()
     U[0, :] = u_init
 

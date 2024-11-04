@@ -5,7 +5,6 @@
 import numpy as np
 import model_params as model
 import scrubbers_canisters as sg
-import scipy.sparse as sp
 import matplotlib.pyplot as plt
 
 from workspace import run_simulation

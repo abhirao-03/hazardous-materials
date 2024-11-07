@@ -8,6 +8,11 @@ class GasCan2D:
         self.y_loc = y_loc                        # y-coordinate of the canister's center (in meters)
         self.radius = radius                      # Radius of the canister
 
+        self.y_u = self.y_loc + self.radius
+        self.y_l = self.y_loc - self.radius
+        self.x_u = self.x_loc + self.radius
+        self.x_l = self.x_loc - self.radius
+
 
     def get_initial_concentration(self, x, y):
         # Create a meshgrid of the x-y plane to apply masks over

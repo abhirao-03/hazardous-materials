@@ -3,7 +3,7 @@ import numpy as np
 import scipy.sparse as sp
 import model_params as model
 
-gas_canister = sg.GasCan2D(x_loc=0.8, y_loc=0.8, radius=0.23, concentration=1.0)
+gas_canister = sg.GasCan2D(x_loc=0.23, y_loc=0.23, radius=0.23, concentration=1.0)
 
 scrubbers = [sg.Scrubber2D(x_loc=0.5, y_loc=0.7, radius=0.08, efficiency=100.0),
                 sg.Scrubber2D(x_loc=0.5, y_loc=0.3, radius=0.08, efficiency=100.0)]
@@ -43,15 +43,17 @@ def run_simulation(gas_canister = gas_canister, scrubbers = scrubbers):
                         else None for i in range(parameters.Nx_points)]
                         for j in range(parameters.Ny_points)], format='csr')
         
+        A = A.toarray()
+
         for i in range(A.shape[0]): # iterates over each row
             # if Cx occurs only once in the row, then double it
-            if np.count_nonzero(np.any(A[i,:], parameters.Cx)) == 1:
+            if np.count_nonzero(A[i,:] == parameters.Cx) == 1:
                 A[i, A[i,:] == parameters.Cx] *= 2
             # if c occurs only once in the row, then double it
-            if np.count_nonzero(abs[i,:] == parameters.Cy) == 1:
+            if np.count_nonzero(A[i,:] == parameters.Cy) == 1:
                 A[i, A[i,:] == parameters.Cy] *= 2
         
-        return A
+        return sp.csr_matrix(A)
 
     x = np.linspace(0, parameters.len_x, parameters.Nx_points)
     y = np.linspace(0, parameters.len_y, parameters.Ny_points)

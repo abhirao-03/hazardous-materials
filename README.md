@@ -109,7 +109,7 @@ The simulation can be configured through the `parameters` class:
 
 ## Visualization
 
-The project includes several visualization features:
+The project visualizes the following:
 - Real-time concentration heatmaps
 - Gas spread boundaries
 - Canister and scrubber locations

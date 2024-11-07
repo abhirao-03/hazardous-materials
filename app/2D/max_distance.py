@@ -26,7 +26,7 @@ for i in range(parameters.Nt_points):
     U_3D[i] = np.flipud(U[i].reshape((parameters.Nx_points, parameters.Ny_points)))
 ######
 
-for time in range(0, parameters.Nt_points, 10):
+for time in range(0, parameters.Nt_points):
     print(f'On time {time}')
     U_current = U_3D[time]
 
@@ -115,6 +115,6 @@ max_distance = dire[0]
 
 for i in range(len(dire)):
     if dire[i] < max_distance:
-        max_distance == dire[i]
+        max_distance = dire[i]
 
-print(max_distance)
+print(f"The maximum distance the detector can be placed from the canister is {round(max_distance, 2)} meters.")

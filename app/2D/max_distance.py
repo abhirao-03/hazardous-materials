@@ -1,19 +1,22 @@
 import numpy as np
+from workspace import *
 import model_params as model
 parameters   = model.parameters()
 
-x_loc = 
-y_loc = 
+x_loc = gas_canister.x_loc
+y_loc = gas_canister.y_loc
 len_x = parameters.len_x
 len_y = parameters.len_y
 Nx = parameters.Nx_points
 Ny = parameters.Ny_points
 
+x = np.linspace(0, len_x, Nx)
+y = np.linspace(0, len_y, Ny)
 # Initialize matrix to store maximum concentration at each point
-U_max = gas_canistor.get_initial_concentration(x, y).reshape((parameters.Nx_points * parameters.Ny_points),)
+U_max = gas_canister.get_initial_concentration(x, y)
 
 ######
-U = run_simulation(gas_canister = canister, scrubbers = scrubbers)     
+U = run_simulation(gas_canister = gas_canister, scrubbers = scrubbers)     
 
 # Unpack the flattened U matrix into a 3D matrix
 # ( with dimensions Nt_points, Nx_points, Ny_points )
@@ -23,20 +26,25 @@ for i in range(parameters.Nt_points):
     U_3D[i] = np.flipud(U[i].reshape((parameters.Nx_points, parameters.Ny_points)))
 ######
 
-# Compare max concentration to each time step's concentration
-for i in range(Nx):
-    for j in range(Ny):
-        # Updates maximum concentration at index i,j
-        if U[i,j] > U_max[i,j]:
-            U_max[i,j] =  U[i,j]
+for time in range(0, parameters.Nt_points, 1000):
+    print(f'On time {time}')
+    U_current = U_3D[time]
 
-# Initializes matrix to record which points would have the detector detect
-binary = np.zeros((Nx, Ny))
-for i in range(Nx):
-    for j in range(Ny):
-        # If maximum is over 1% then it would detect
-        if U_max[i,j] >= 0.01:
-            binary[i,j] = 1
+# Compare max concentration to each time step's concentration
+    for i in range(Nx):
+        for j in range(Ny):
+            # Updates maximum concentration at index i,j
+            if U_current[i,j] > U_max[i,j]:
+                U_max[i,j] =  U_current[i,j]
+
+    # Initializes matrix to record which points would have the detector detect
+    binary = np.zeros((Nx, Ny))
+    for i in range(Nx):
+        for j in range(Ny):
+            # If maximum is over 1% then it would detect
+            if U_max[i,j] >= 0.01:
+                binary[i,j] = 1
+        
 
 # Finds the perimeter of the area of detected concentrations
 # Intializes array to store maximum distance index from canister in each direction
@@ -99,7 +107,7 @@ for i in range(1, Nx-1):
 
 # Finds distance from canister
 for i in range(len(dire)):
-    dire[i] = np.sqrt((x_loc-dire[i,0])**2+(y_loc-j)**2)
+    dire[i] = np.sqrt((x_loc - dire[i][0])**2+(y_loc - j)**2)
 
 # Finds the minimum distance from canister of the perimeter
 max_distance = dire[0]
@@ -107,3 +115,5 @@ max_distance = dire[0]
 for i in range(len(dire)):
     if dire[i] < max_distance:
         max_distance == dire[i]
+
+print()

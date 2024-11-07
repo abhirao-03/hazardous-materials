@@ -9,13 +9,15 @@ parameters = model.parameters()
 
 U_tracked = run_simulation()
 
-min_concentration = 0
-max_concentration = 0.2
+min_concentration = 0.0
+max_concentration = 0.02
 
 fig, ax = plt.subplots()
 heatmap = ax.imshow(U_tracked[0].reshape(parameters.Nx_points, parameters.Ny_points), cmap='magma', vmin=min_concentration, vmax=max_concentration, interpolation='nearest')
 heatmap = ax.imshow(U_tracked[0].reshape(parameters.Nx_points, parameters.Ny_points), cmap='magma', vmin=min_concentration, vmax=max_concentration, interpolation='nearest')
 ax.set_title("Heatmap over Time")
+
+ax.plot(gas_canister.x_loc*100 + 96, gas_canister.y_loc*100, 'o', color='cyan', markersize=8, alpha=0.2)
 
 for scrubber in scrubbers:
     fixed_point, = ax.plot(scrubber.x_loc*100, scrubber.y_loc*100, 'o', color='cyan', markersize=8, alpha=0.2)

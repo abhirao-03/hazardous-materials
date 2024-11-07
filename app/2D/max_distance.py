@@ -12,6 +12,17 @@ Ny = parameters.Ny_points
 # Initialize matrix to store maximum concentration at each point
 U_max = gas_canistor.get_initial_concentration(x, y).reshape((parameters.Nx_points * parameters.Ny_points),)
 
+######
+U = run_simulation(gas_canister = canister, scrubbers = scrubbers)     
+
+# Unpack the flattened U matrix into a 3D matrix
+# ( with dimensions Nt_points, Nx_points, Ny_points )
+U_3D = np.zeros((parameters.Nt_points, parameters.Nx_points, parameters.Ny_points))
+
+for i in range(parameters.Nt_points):
+    U_3D[i] = np.flipud(U[i].reshape((parameters.Nx_points, parameters.Ny_points)))
+######
+
 # Compare max concentration to each time step's concentration
 for i in range(Nx):
     for j in range(Ny):

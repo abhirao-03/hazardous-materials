@@ -8,14 +8,40 @@ This project simulates the diffusion of gas from multiple sources in a 2D space,
 
 ## Project Structure
 
+app/
+├─ 1D/
+│  ├─ animate.py
+│  ├─ model_params.py
+│  ├─ workspace.py
+│  ├─ scrubbers_canistors.py
+├─ 2D/
+│  ├─ animate.py
+│  ├─ scrubbers_canistors.py
+│  ├─ workspace.py
+│  ├─ model_params.py
+│  ├─ max_distance_multiple.py
+│  ├─ max_distance.py
+exploration/
+
+
+For both 1D and 2D the following files are the same:
 
 - `model_params.py`: Model parameters and configuration
 - `scrubbers_canisters.py`: Classes for gas canisters and scrubbers
 - `workspace.py`: Core simulation functionality
 - `animate.py`: Visualization and animation utilities
-- `max_distance_multiple.py`: Detector optimization algorithms
+
+For 2D the following files implement our detector optimization algorithms:
+- `max_distance.py`
+- `max_distance_multiple.py`
 
 ## Usage
+
+### Animating Gas Failure
+
+To animate gas containment failure simply run `animate.py`. This animation has a gas canistor with radius 0.23 metres, centered in a 4 metres by 4 metres room.
+
+You can change the parameters of the room and the gas canistor by changing `model_params.py` and `workspace.py` respectively.
 
 ### Gas Canistors and Scrubbers
 
@@ -29,11 +55,11 @@ gas_canisters = [
     GasCan2D(x_loc=0.1, y_loc=0.9, radius=0.05, concentration=1.0)
 ]
 
+# Define scrubbers
 scrubbers = [
     Scrubber2D(x_loc=0.5, y_loc=0.7, radius=0.08, efficiency=500.0),
     Scrubber2D(x_loc=0.5, y_loc=0.3, radius=0.08, efficiency=500.0)
 ]
-
 ```
 
 ### Basic Simulation

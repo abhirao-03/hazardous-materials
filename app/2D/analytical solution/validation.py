@@ -68,22 +68,21 @@ def run_simulation(gas_canister = gas_canister):
 
 parameters = model.parameters()
 
-n, m = parameters.Nx_points, parameters.Ny_points
+N, M = 20, 20
 
-lamb_nm = np.zeros((n,m))
+lamb_nm = np.zeros((N,M))
 
-for i in range(n):
-    for j in range(m):
+for i in range(N):
+    for j in range(M):
         D = parameters.diffusion_coeff
         lamb_nm[i][j] = D * (((i * np.pi/parameters.len_x)**2) + ((j * np.pi/parameters.len_x)**2))
+
 
 # Parameters (example values for a, b, and D)
 a = parameters.len_x  # Length in x-direction
 b = parameters.len_y  # Length in y-direction
 D = parameters.diffusion_coeff  # Constant in lambda_nm formula
 
-# Define grid size for n and m
-N, M = parameters.Nx_points, parameters.Ny_points  # Size of the matrices (e.g., 5x5 matrix for A_nm and lambda_nm)
 
 # Initialize matrices
 A_nm = np.zeros((N, M))

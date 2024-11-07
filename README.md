@@ -117,3 +117,5 @@ The project visualizes the following:
 - Canister and scrubber locations
 - Optimal detector positions
 - Animated diffusion process
+
+An overview of these can be seen in the "visualisation" notebook.

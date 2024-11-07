@@ -23,6 +23,7 @@ app/
 │  ├─ max_distance_multiple.py
 │  ├─ max_distance.py
 exploration/
+visualisation
 ```
 
 For both 1D and 2D the following files are the same:

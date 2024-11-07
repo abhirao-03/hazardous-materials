@@ -403,7 +403,9 @@ def max_distance(parameters: model.parameters, gas_canisters: list, scrubbers: l
                 
     return U_3D
 
-# -------------------------------------------------------------------------
+# =============================================================================   
+# Running the algorithm
+# =============================================================================  
 
 gas_canisters = [
     sg.GasCan2D(x_loc=3.2, y_loc=3.2, radius=0.23, concentration=1.0),
@@ -413,6 +415,7 @@ gas_canisters = [
     sg.GasCan2D(x_loc=3.6, y_loc=1.6, radius=0.23, concentration=1.0)
 ]
 
+# Scrubbers turned off in this run
 scrubbers = [sg.Scrubber2D(x_loc=1, y_loc=2, radius=0.46, efficiency=0),
                 sg.Scrubber2D(x_loc=3, y_loc=2, radius=0.46, efficiency=0)]
 

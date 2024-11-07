@@ -3,7 +3,7 @@ import numpy as np
 import scipy.sparse as sp
 import model_params as model
 
-gas_canister = sg.GasCan2D(x_loc=0.23, y_loc=0.23, radius=0.23, concentration=1.0)
+gas_canister = sg.GasCan2D(x_loc=2.0, y_loc=2.0, radius=0.23, concentration=1.0)
 
 scrubbers = [sg.Scrubber2D(x_loc=0.5, y_loc=0.7, radius=0.08, efficiency=100.0),
                 sg.Scrubber2D(x_loc=0.5, y_loc=0.3, radius=0.08, efficiency=100.0)]

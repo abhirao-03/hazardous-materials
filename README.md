@@ -8,34 +8,22 @@ This project simulates the diffusion of gas from multiple sources in a 2D space,
 
 ## Project Structure
 
+```txt
 app/
-
 ├─ 1D/
-
 │  ├─ animate.py
-
 │  ├─ model_params.py
-
 │  ├─ workspace.py
-
 │  ├─ scrubbers_canistors.py
-
 ├─ 2D/
-
 │  ├─ animate.py
-
 │  ├─ scrubbers_canistors.py
-
 │  ├─ workspace.py
-
 │  ├─ model_params.py
-
 │  ├─ max_distance_multiple.py
-
 │  ├─ max_distance.py
-
 exploration/
-
+```
 
 For both 1D and 2D the following files are the same:
 

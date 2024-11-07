@@ -3,9 +3,11 @@ import numpy as np
 import scipy.sparse as sp
 import model_params as model
 
-gas_canister = sg.GasCan2D(x_loc=0.5, y_loc=0.5, radius=0.1, concentration=1.0)
-scrubbers = [sg.Scrubber2D(x_loc=0.5, y_loc=0.7, radius=0.08, efficiency=300.0),
-                sg.Scrubber2D(x_loc=0.5, y_loc=0.3, radius=0.08, efficiency=300.0)]
+gas_canister = sg.GasCan2D(x_loc=0.8, y_loc=0.8, radius=0.1, concentration=1.0)
+scrubbers = [sg.Scrubber2D(x_loc=0.5, y_loc=0.7, radius=0.08, efficiency=100.0),
+                sg.Scrubber2D(x_loc=0.5, y_loc=0.3, radius=0.08, efficiency=100.0)]
+scrubbers = [sg.Scrubber2D(x_loc=0.5, y_loc=0.7, radius=0.08, efficiency=0),
+                sg.Scrubber2D(x_loc=0.5, y_loc=0.3, radius=0.08, efficiency=0)]
 
 def run_simulation(gas_canister = gas_canister, scrubbers = scrubbers):
     parameters   = model.parameters()
@@ -56,7 +58,7 @@ def run_simulation(gas_canister = gas_canister, scrubbers = scrubbers):
     for n in range(1, parameters.Nt_points):
         u = sp.linalg.minres(A, u)[0]
         U[n, :] = u
-        print(f"On iteration {n}")
+        print(f"On iteration {n+1}")
 
     print('COMPLETED ALL ITERATIONS')
 

@@ -1,10 +1,16 @@
-import scrubbers_canisters as sg
 import numpy as np
 import scipy as sp
 import scipy.sparse as sparse
-import model_params as model
 import scipy.integrate as integrate
 from scipy.integrate import dblquad
+
+
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import scrubbers_canisters as sg
+import model_params as model
 
 gas_canister = sg.GasCan2D(x_loc=0.5, y_loc=0.5, radius=0.1, concentration=1.0)
 
@@ -90,11 +96,12 @@ for n in range(N - 1):
 
         A_nm[n][m] = 4 * y_term * x_term
 
-def u_exact(x, y, t):
-    for i in range(N):
-        for i in range(M):
-            
+
+save_A_nm = os.path.join(os.path.dirname(__file__), 'A_nm.npy')
+save_lamb_nm = os.path.join(os.path.dirname(__file__), 'lamb_nm.npy')
+
+np.save(save_A_nm, A_nm)
+np.save(save_lamb_nm, lamb_nm)
 
 
-
-print()
+print('COMPLETED BUILDING A_nm AND lamb_nm')

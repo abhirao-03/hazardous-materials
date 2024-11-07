@@ -75,13 +75,7 @@ lamb_nm = np.zeros((N,M))
 for i in range(N):
     for j in range(M):
         D = parameters.diffusion_coeff
-        lamb_nm[i][j] = D * (((i * np.pi/parameters.len_x)**2) + ((j * np.pi/parameters.len_x)**2))
-
-
-# Parameters (example values for a, b, and D)
-a = parameters.len_x  # Length in x-direction
-b = parameters.len_y  # Length in y-direction
-D = parameters.diffusion_coeff  # Constant in lambda_nm formula
+        lamb_nm[i][j] = (((i * np.pi)**2) + ((j * np.pi)**2))
 
 
 # Initialize matrices

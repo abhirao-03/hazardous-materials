@@ -43,6 +43,14 @@ def run_simulation(gas_canister = gas_canister, scrubbers = scrubbers):
                         else None for i in range(parameters.Nx_points)]
                         for j in range(parameters.Ny_points)], format='csr')
         
+        for i in range(A.shape[0]): # iterates over each row
+            # if Cx occurs only once in the row, then double it
+            if np.count_nonzero(np.any(A[i,:], parameters.Cx)) == 1:
+                A[i, A[i,:] == parameters.Cx] *= 2
+            # if c occurs only once in the row, then double it
+            if np.count_nonzero(abs[i,:] == parameters.Cy) == 1:
+                A[i, A[i,:] == parameters.Cy] *= 2
+        
         return A
 
     x = np.linspace(0, parameters.len_x, parameters.Nx_points)

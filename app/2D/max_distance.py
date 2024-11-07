@@ -16,7 +16,7 @@ U_max = gas_canistor.get_initial_concentration(x, y).reshape((parameters.Nx_poin
 U = run_simulation(gas_canister = canister, scrubbers = scrubbers)     
 
 # Unpack the flattened U matrix into a 3D matrix
-# ( with dimensions Nx_points, Ny_points, Nt_points )
+# ( with dimensions Nt_points, Nx_points, Ny_points )
 U_3D = np.zeros((parameters.Nt_points, parameters.Nx_points, parameters.Ny_points))
 
 for i in range(parameters.Nt_points):

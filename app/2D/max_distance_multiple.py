@@ -38,29 +38,44 @@ parameters = model.parameters()
  
 def max_distance(parameters: model.parameters, gas_canisters: list, scrubbers: list, run_simulation):
     """
-    Since each gas canister in the room is assumed to be identical, 
-    (i.e idential initial concentration, gas, dimensions)
-    the function finds the maximum distance from each canister a detector can be placed
-    such that it detects a concentration value of 1% of the initial concentration released.
-    
-    It then calculates the optimal location the detector should be place such that 
-    it is within this distance for each gas canister in the room.
-    
-    If it is not possible to find an optimal location for every canister, 
-    the function finds the next best location to cover as many as it can.
+    The function calculates the optimal placement of gas detectors in a room 
+    with multiple gas canisters and scrubbers, ensuring that each detector can 
+    detect a gas concentration of at least 1% of the initial concentration from
+    any canister within a specified maximum distance. The function also 
+    visualizes the gas spread and detector placements over time.
 
-    Args:
-        parameters        Uses parameters defined in the model to compute the large block Matrix
-            Nx_points     number of x spatial points
-            Ny_points     number of y spatial points
-            etc...
+    Inputs:
+    parameters (model.parameters): Model parameters defining space and time grid
+                                   points, concentration matrix, and more.
+                                   
+    gas_canisters (list): 
+        A list of gas canister objects, each containing:
+        - x_loc, y_loc (float): Coordinates of the canister's center relative 
+                                to the origin point (metres)
+        - radius (float):       Radius of the canister (metres)
+        - concentration (float): Initial concentration of gas in the canister.
         
-            U             array storing concentration values of the spatial grid at each time step
+    scrubbers (list): 
+        A list of scrubber objects, each containing:
+        - x_loc, y_loc (float): Coordinates of the scrubber's center relative 
+                                to the origin point (metres)
+        - radius (float): Radius of the scrubber (metres).
+        - efficiency (float): Efficiency of the scrubber.
         
-    Outputs:
-        det_loc           a tuple array showing the location the detector should be placed in the room.
-                          (length, width)
-                            
+    run_simulation (function): Function that simulates gas dispersion from a 
+                               canister in the presence of scrubbers, 
+                               returning a concentration matrix for each timestep.  
+    
+    Returns:
+    U_3D (np.ndarray):    A 3D numpy array containing the concentration values 
+                          at each point in the spatial grid over time, with 
+                          dimensions [Nt_points, Nx_points, Ny_points].
+                          
+    Outputs (prints and plots):
+    detector_locs:        List of optimal (x, y) grid indices for detector placement.
+    
+    Prints a summary of detector grid positions and corresponding physical coordinates.
+    Plots showing gas concentration spread, canister, scrubber, and detector locations.                  
     """
 
     # =========================================================================  

@@ -405,20 +405,18 @@ def max_distance(parameters: model.parameters, gas_canisters: list, scrubbers: l
 
 # -------------------------------------------------------------------------
 
-gas_canisters = [ 
-    sg.GasCan2D(x_loc=0.9, y_loc=0.9,radius=0.05, concentration=1.0),
-    sg.GasCan2D(x_loc=0.1, y_loc=0.9,radius=0.05, concentration=1.0),
-    sg.GasCan2D(x_loc=0.4, y_loc=0.6,radius=0.05, concentration=1.0),
-    sg.GasCan2D(x_loc=0.7, y_loc=0.2,radius=0.05, concentration=1.0),
-    sg.GasCan2D(x_loc=0.9, y_loc=0.3,radius=0.05, concentration=1.0)
+gas_canisters = [
+    sg.GasCan2D(x_loc=3.2, y_loc=3.2, radius=0.23, concentration=1.0),
+    sg.GasCan2D(x_loc=0.4, y_loc=3.6, radius=0.23, concentration=1.0),
+    sg.GasCan2D(x_loc=1.6, y_loc=2.4, radius=0.23, concentration=1.0),
+    sg.GasCan2D(x_loc=2.8, y_loc=0.8, radius=0.23, concentration=1.0),
+    sg.GasCan2D(x_loc=3.6, y_loc=1.6, radius=0.23, concentration=1.0)
 ]
 
-scrubbers = [sg.Scrubber2D(x_loc=0.5, y_loc=0.7, radius=0.08, efficiency=500.0),
-                sg.Scrubber2D(x_loc=0.5, y_loc=0.3, radius=0.08, efficiency=500.0)]
+scrubbers = [sg.Scrubber2D(x_loc=1, y_loc=2, radius=0.46, efficiency=0),
+                sg.Scrubber2D(x_loc=3, y_loc=2, radius=0.46, efficiency=0)]
 
 U_3D = max_distance(parameters=parameters, 
                     gas_canisters=gas_canisters, 
                     scrubbers=scrubbers, 
                     run_simulation=run_simulation)
-
-      

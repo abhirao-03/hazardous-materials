@@ -26,7 +26,7 @@ class parameters():
         self.Nt_points = Nt_points
         self.dt = self.t_end / self.Nt_points
 
-        self.diffusion_coeff = 10e-5
+        self.diffusion_coeff = 1.0
 
         self.Cx = self.diffusion_coeff * (self.dt / (self.dx ** 2))
         self.Cy = self.diffusion_coeff * (self.dt / (self.dy ** 2))

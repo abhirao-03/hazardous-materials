@@ -26,7 +26,7 @@ for i in range(parameters.Nt_points):
     U_3D[i] = np.flipud(U[i].reshape((parameters.Nx_points, parameters.Ny_points)))
 ######
 
-for time in range(0, parameters.Nt_points, 1000):
+for time in range(0, parameters.Nt_points, 10):
     print(f'On time {time}')
     U_current = U_3D[time]
 
@@ -105,9 +105,10 @@ for i in range(1, Nx-1):
                 # Appends real position 
                 dire.append([i*x_l,j*y_l])
 
+
 # Finds distance from canister
 for i in range(len(dire)):
-    dire[i] = np.sqrt((x_loc - dire[i][0])**2+(y_loc - j)**2)
+    dire[i] = np.sqrt((x_loc - dire[i][0])**2+(y_loc - dire[i][1])**2)
 
 # Finds the minimum distance from canister of the perimeter
 max_distance = dire[0]
@@ -116,4 +117,4 @@ for i in range(len(dire)):
     if dire[i] < max_distance:
         max_distance == dire[i]
 
-print()
+print(max_distance)

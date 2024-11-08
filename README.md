@@ -26,7 +26,9 @@ exploration/
 visualisation/
 ```
 
-For both 1D and 2D the following files are the same:
+You can find our figures and animations in `visualisation`
+
+For both 1D and 2D the following files have the same purpose:
 
 - `model_params.py`: Model parameters and configuration
 - `scrubbers_canisters.py`: Classes for gas canisters and scrubbers
